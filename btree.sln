@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "treap", "treap\treap.csproj", "{F90A25E6-6182-4BCB-9275-B806BA9BCA06}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "btree", "btree\btree.csproj", "{F90A25E6-6182-4BCB-9275-B806BA9BCA06}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,4 +1,5 @@
-This a C# treap implementation. A treap is a simple balanced binary search tree.
-It is an alternative to AA, red-black and AVL trees.
-It could be turned into a dictionary using a keyvaluecomparer.
-It also needs iterators for matching prefixes.
+This a C# B+ Tree implementation. 
+It is an alternative to binary search trees like treap, AA, red-black and AVL trees.
+
+It is incomplete and only supports adding at the moment.
+

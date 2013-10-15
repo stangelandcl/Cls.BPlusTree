@@ -42,17 +42,17 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Treap\Treap.cs" />
     <Compile Include="Treap\TreapHelpers.cs" />
-    <Compile Include="BufferedTreap\Algorithms.cs" />
-    <Compile Include="BufferedTreap\BTree.cs" />
-    <Compile Include="BufferedTreap\BTreeBuffer.cs" />
-    <Compile Include="BufferedTreap\BTreeTest.cs" />
-    <Compile Include="BufferedTreap\InternalNode.cs" />
-    <Compile Include="BufferedTreap\LeafNode.cs" />
-    <Compile Include="BufferedTreap\INode.cs" />
+    <Compile Include="Btree\Algorithms.cs" />
+    <Compile Include="Btree\BTree.cs" />
+    <Compile Include="Btree\BTreeBuffer.cs" />
+    <Compile Include="Btree\BTreeTest.cs" />
+    <Compile Include="Btree\InternalNode.cs" />
+    <Compile Include="Btree\LeafNode.cs" />
+    <Compile Include="Btree\INode.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Folder Include="Treap\" />
-    <Folder Include="BufferedTreap\" />
+    <Folder Include="Btree\" />
   </ItemGroup>
 </Project>

@@ -43,7 +43,7 @@ namespace treap
 			if(leaf != null){
 				if(leaf.Remove(key, comparer))
 				{
-					if(leaf.Count == 0)
+					//
 				}
 			}else{
 
