@@ -33,20 +33,29 @@ namespace treap
 			for(int i=Count, j=0;i<Count + count && j <count;i++,j++){
 				Keys[i] = leaf.Keys[j];
 				Values[i] = leaf.Values[j];
-			}	
+			}
+			node.RemoveRange(0, count);
 			Count += count;
 		}
 
 		public void AddLeft(INode<TKey,TValue> node, int count){
 			var leaf = (LeafNode<TKey,TValue>)node;
-			Array.Copy(Keys,0, Keys, Count, count);
-			Array.Copy(Values,0, Values, Count, count);
+			Algorithms.Copy(Keys,0, Keys, count, Count);
+			Algorithms.Copy(Values,0, Values, count, Count);
 
-			for(int i=0;i< count ;i++){
-				Keys[i] = leaf.Keys[i];
-				Values[i] = leaf.Values[i];
-			}		
+			var start = leaf.Count - count;
+			for(int i=0, j = start;i< count ;i++, j++){
+				Keys[i] = leaf.Keys[j];
+				Values[i] = leaf.Values[j];
+			}	
+			node.RemoveRange(start, count);
 			Count += count;
+		}
+
+		public void RemoveRange(int index, int count){
+			Algorithms.RemoveRange(Keys, index, count, Count);
+			Algorithms.RemoveRange(Values, index, count, Count);
+			Count -= count;
 		}
 
 		public bool Remove (TKey key, IComparer<TKey> comparer)
@@ -93,8 +102,8 @@ namespace treap
 			Count /= 2;
 			var half = Count;
 			var right = new LeafNode<TKey,TValue>();
-			Array.Copy(Keys, half, right.Keys,0, half);
-			Array.Copy(Values, half, right.Values,0, half);
+			Algorithms.Copy(Keys, half, right.Keys,0, half);
+			Algorithms.Copy(Values, half, right.Values,0, half);
 			right.Count = this.Count;
 			return new LeafSplit<TKey,TValue>{
 				Right = right,

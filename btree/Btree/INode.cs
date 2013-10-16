@@ -9,7 +9,7 @@ namespace treap
 		void AddLeft(INode<TKey,TValue> node, int count);
 		int Count {get; set;}
 		TKey[] Keys {get;}
-
+		void RemoveRange(int index, int count);
 	}
 
 	public static class Constants{

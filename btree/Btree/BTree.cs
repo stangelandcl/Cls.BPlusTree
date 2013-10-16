@@ -30,8 +30,7 @@ namespace treap
 		}
 
 		public void Remove(TKey key){
-			if(root == null) 
-				return;
+			if(root == null) return;
 			INode<TKey,TValue> parent = null;
 			Remove(ref root, key, parent, 0);
 		}
@@ -40,9 +39,14 @@ namespace treap
 			if(node.Count >= Constants.MinimumSize)
 				return;
 
-			if(parent == null){
-				if(node.Count == 0)
-					node = null;
+			if(parent == null){ // node is root
+				if(node.Count == 0){
+					var inode = node as InternalNode<TKey,TValue>;
+					if(inode != null)
+						node = inode.Nodes[0]; // move node up a level
+					else
+						node = null; // leaf node is empty means root is empty.
+				}
 				return;
 			}
 
@@ -51,8 +55,8 @@ namespace treap
 				var leftIndex = index -1;
 				var left = iparent.Nodes[leftIndex];
 				if(left.Count > Constants.MinimumSize){
-					node.AddLeft(left, 1);
-					left.Count--;
+					node.AddLeft(left, Math.Max(1, (left.Count - Constants.MinimumSize) / 2));
+					//if(leftIndex < iparent.Count) // always true
 					iparent.Keys[leftIndex] = left.Keys[left.Count-1];
 					return;
 				}
@@ -60,8 +64,7 @@ namespace treap
 				var rightIndex = index+1;
 				var right = iparent.Nodes[rightIndex];
 				if(right.Count > Constants.MinimumSize){
-					node.AddRight(right, 1);
-					right.RemoveAt(0);
+					node.AddRight(right, Math.Max(1, (right.Count - Constants.MinimumSize) / 2));
 					iparent.Keys[index] = node.Keys[node.Count-1];
 					return;
 				}
@@ -80,6 +83,7 @@ namespace treap
 				var right = iparent.Nodes[rightIndex];
 				right.AddLeft(node, node.Count);
 				iparent.RemoveAt(index);
+				node = null;
 				return;
 			}
 		}
@@ -91,6 +95,7 @@ namespace treap
 				var keyIndex = inode.IndexOf(key, comparer);
 				var next = inode.Nodes[keyIndex];
 				Remove(ref next, key, node, keyIndex);
+				//if(node.Count < Constants.MinimumSize && parent != null || node.Count == 0)
 				Rebalance(ref node, parent, index);
 				return;
 			}
@@ -177,6 +182,7 @@ namespace treap
 
 		public bool ContainsKey (TKey key)
 		{
+			if(root == null) return false;
 			return ContainsKey(root, key);
 		}
 

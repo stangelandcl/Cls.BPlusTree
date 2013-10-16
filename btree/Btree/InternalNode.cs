@@ -41,24 +41,34 @@ namespace treap
 			Count--;
 		}
 
+		
+		public void RemoveRange(int index, int count){
+			Algorithms.RemoveRange(Keys, index, count, Count);
+			Algorithms.RemoveRange(Nodes, index, count, Count+1);
+			Count -= count;
+		}
+
 		public void AddRight(INode<TKey,TValue> node, int count){
 			var leaf = (InternalNode<TKey,TValue>)node;
 			for(int i=Count, j=0;j <count;i++,j++)
 				Keys[i] = leaf.Keys[j];
 			for(int i=Count, j=0;j <count+1;i++,j++)
 				Nodes[i] = leaf.Nodes[j];
+			node.RemoveRange(0, count);
 			Count += count;
 		}
 
 		public void AddLeft(INode<TKey,TValue> node, int count){
 			var leaf = (InternalNode<TKey,TValue>)node;
-			Array.Copy(Keys,0, Keys, Count, count);
-			Array.Copy(Nodes,0, Nodes, NodeCount, count);
+			Algorithms.Copy(Keys,0, Keys, count, Count);
+			Algorithms.Copy(Nodes,0, Nodes, count, Count + 1);
 
-			for(int i=0;i< count ;i++){
-				Keys[i] = leaf.Keys[i];
-				Nodes[i] = leaf.Nodes[i];
+			var start = leaf.Count - count;
+			for(int i=0,j=start;i< count ;i++, j++){
+				Keys[i] = leaf.Keys[j];
+				Nodes[i] = leaf.Nodes[j];
 			}		
+			node.RemoveRange(start, count);
 			Count+=count;
 		}
 
@@ -91,8 +101,8 @@ namespace treap
 			Count /= 2;
 			var half = Count;
 			var right = new InternalNode<TKey,TValue>();
-			Array.Copy(Keys, half+1, right.Keys,0, half);
-			Array.Copy(Nodes, half+1, right.Nodes,0, half + 1);
+			Algorithms.Copy(Keys, half+1, right.Keys,0, half);
+			Algorithms.Copy(Nodes, half+1, right.Nodes,0, half + 1);
 			var middle = Keys[half];
 			ClearRightHalf();
 			right.Count = this.Count;
