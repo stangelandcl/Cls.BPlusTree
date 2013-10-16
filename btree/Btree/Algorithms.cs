@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace treap
 {
@@ -26,9 +27,15 @@ namespace treap
 			array[index] = item;
 		}
 
+		[Conditional("DEBUG")]
+		static void Clear<T>(T[] keys, int index){			
+			keys[index] = default(T);
+		}
+
 		public static void RemoveAt <T>(T[] keys, int index, int count)
 		{
 			Array.Copy(keys,index + 1, keys, index, count - index -1);
+			Clear(keys, count -1);
 		}
 	}
 }

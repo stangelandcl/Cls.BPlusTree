@@ -15,7 +15,7 @@ namespace treap
 		}
 
 		IComparer<TKey> comparer;
-		INode root;	
+		INode<TKey,TValue> root;	
 		LikeComparer<TKey> likeComparer;
 
 		#region ICollection implementation
@@ -29,28 +29,79 @@ namespace treap
 			}
 		}
 
-		void Remove(TKey key){
-			if(root == null) return;		
-
-			INode parent = null;
-			Remove(ref root, key, ref parent);
-			if(parent != null)
-				root = parent;
+		public void Remove(TKey key){
+			if(root == null) 
+				return;
+			INode<TKey,TValue> parent = null;
+			Remove(ref root, key, parent, 0);
 		}
 
-		void Remove(ref INode node, TKey key, ref INode parent){
-			var leaf = node as LeafNode<TKey, TValue>;
-			if(leaf != null){
-				if(leaf.Remove(key, comparer))
-				{
-					//
-				}
-			}else{
+		void Rebalance(ref INode<TKey, TValue> node, INode<TKey, TValue> parent, int index){
+			if(node.Count >= Constants.MinimumSize)
+				return;
 
+			if(parent == null){
+				if(node.Count == 0)
+					node = null;
+				return;
+			}
+
+			var iparent = (InternalNode<TKey,TValue>)parent;
+			if(index > 0){
+				var leftIndex = index -1;
+				var left = iparent.Nodes[leftIndex];
+				if(left.Count > Constants.MinimumSize){
+					node.AddLeft(left, 1);
+					left.Count--;
+					iparent.Keys[leftIndex] = left.Keys[left.Count-1];
+					return;
+				}
+			}else if(index < iparent.Count-1){
+				var rightIndex = index+1;
+				var right = iparent.Nodes[rightIndex];
+				if(right.Count > Constants.MinimumSize){
+					node.AddRight(right, 1);
+					right.RemoveAt(0);
+					iparent.Keys[index] = node.Keys[node.Count-1];
+					return;
+				}
+			}
+
+			// could not steal from sibling, so merge with one instead
+			if(index > 0){
+				var leftIndex = index -1;
+				var left = iparent.Nodes[leftIndex];
+				left.AddRight(node, node.Count);
+				iparent.Keys[leftIndex] = left.Keys[left.Count-1];
+				iparent.RemoveAt(index);
+				return;
+			}else if(index < iparent.Count -1){
+				var rightIndex = index + 1;
+				var right = iparent.Nodes[rightIndex];
+				right.AddLeft(node, node.Count);
+				iparent.RemoveAt(index);
+				return;
 			}
 		}
 
-		void Add(ref INode node, TKey key, TValue value, ref INode parent, bool overwrite){
+		void Remove(ref INode<TKey,TValue> node, TKey key, INode<TKey,TValue> parent, int index){
+			var leaf = node as LeafNode<TKey, TValue>;
+			if(leaf == null){
+				var inode = (InternalNode<TKey,TValue>)node;
+				var keyIndex = inode.IndexOf(key, comparer);
+				var next = inode.Nodes[keyIndex];
+				Remove(ref next, key, node, keyIndex);
+				Rebalance(ref node, parent, index);
+				return;
+			}
+
+			if(!leaf.Remove(key, comparer))
+				return;
+
+			Rebalance(ref node, parent, index);
+		}
+
+		void Add(ref INode<TKey,TValue> node, TKey key, TValue value, ref INode<TKey,TValue> parent, bool overwrite){
 			if(node == null){
 				node = new LeafNode<TKey,TValue>(key, value);
 				Count++;
@@ -75,7 +126,7 @@ namespace treap
 					if(index < inode.Count)
 						Add(ref left, key, value, ref parent, overwrite);
 					else{
-						INode r =right;
+						INode<TKey,TValue> r =right;
 						Add(ref r, key, value, ref parent, overwrite);
 					}
 					return;
@@ -101,13 +152,13 @@ namespace treap
 			if(index < leaf.Count)
 				Add(ref node, key, value, ref parent, overwrite);
 			else{
-				INode r = leafSplit.Right;
+				INode<TKey,TValue> r = leafSplit.Right;
 				Add(ref r, key, value, ref parent, overwrite);
 			}
 		}
 
 		void Insert(TKey key, TValue value, bool overwrite){
-			INode parent = null;
+			INode<TKey,TValue> parent = null;
 			Add(ref root, key, value, ref parent, overwrite);
 			if(parent != null)
 				root = parent;
@@ -129,7 +180,7 @@ namespace treap
 			return ContainsKey(root, key);
 		}
 
-		bool ContainsKey(INode node, TKey key){
+		bool ContainsKey(INode<TKey,TValue> node, TKey key){
 			var n = node as InternalNode<TKey, TValue>;
 			if(n != null){
 				var index = n.IndexOf(key, comparer);
@@ -145,7 +196,7 @@ namespace treap
 			return TryGetValue(root, key, out value);
 		}
 
-		bool TryGetValue(INode node, TKey key, out TValue value){
+		bool TryGetValue(INode<TKey,TValue> node, TKey key, out TValue value){
 			var n = node as InternalNode<TKey, TValue>;
 			if(n != null){
 				var index = n.IndexOf(key, comparer);
@@ -173,7 +224,7 @@ namespace treap
 			return Next(root).GetEnumerator();
 		}
 
-		IEnumerable<KeyValuePair<TKey,TValue>> Next(INode node){
+		IEnumerable<KeyValuePair<TKey,TValue>> Next(INode<TKey,TValue> node){
 			if(node == null) yield break;
 			var x = node as InternalNode<TKey,TValue>;
 			if(x != null){

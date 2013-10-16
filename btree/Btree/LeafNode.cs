@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace treap
 {
-	public class LeafNode<TKey, TValue> : INode{
+	public class LeafNode<TKey, TValue> : INode<TKey,TValue>{
 		public LeafNode(){
 			Keys = new TKey[Constants.NodeSize];
 			Values = new TValue[Keys.Length];
@@ -18,17 +18,42 @@ namespace treap
 			Count =1;			
 		}
 
-		public int Count;
-		public TKey[] Keys;
+		public int Count {get;set;}
+		public TKey[] Keys {get; private set;}
 		public TValue[] Values;
+
+		public void RemoveAt(int index){
+			Algorithms.RemoveAt(Keys, index, Count);
+			Algorithms.RemoveAt(Values, index, Count);
+			Count--;
+		}
+
+		public void AddRight(INode<TKey,TValue> node, int count){
+			var leaf = (LeafNode<TKey,TValue>)node;
+			for(int i=Count, j=0;i<Count + count && j <count;i++,j++){
+				Keys[i] = leaf.Keys[j];
+				Values[i] = leaf.Values[j];
+			}	
+			Count += count;
+		}
+
+		public void AddLeft(INode<TKey,TValue> node, int count){
+			var leaf = (LeafNode<TKey,TValue>)node;
+			Array.Copy(Keys,0, Keys, Count, count);
+			Array.Copy(Values,0, Values, Count, count);
+
+			for(int i=0;i< count ;i++){
+				Keys[i] = leaf.Keys[i];
+				Values[i] = leaf.Values[i];
+			}		
+			Count += count;
+		}
 
 		public bool Remove (TKey key, IComparer<TKey> comparer)
 		{
 			var index = Array.BinarySearch(Keys, 0, Count, key, comparer);
 			if(index < 0) return false;
-			Algorithms.RemoveAt(Keys, index, Count);
-			Algorithms.RemoveAt(Values, index, Count);
-			Count--;
+			RemoveAt(index);
 			return true;
 		}
 
@@ -73,7 +98,7 @@ namespace treap
 			right.Count = this.Count;
 			return new LeafSplit<TKey,TValue>{
 				Right = right,
-				Middle = Keys[half-1]
+				Middle = Keys[half-1] // right most key in left node 
 			};
 		}
 

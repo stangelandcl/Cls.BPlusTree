@@ -4,12 +4,12 @@ using System.Diagnostics;
 
 namespace treap
 {
-	public class InternalNode<TKey, TValue> : INode{
+	public class InternalNode<TKey, TValue> : INode<TKey,TValue>{
 		public InternalNode(){
 			Keys = new TKey[Constants.NodeSize -1];
-			Nodes = new INode[Keys.Length + 1];			
+			Nodes = new INode<TKey,TValue>[Keys.Length + 1];			
 		}
-		public InternalNode(TKey key, INode left, INode right)
+		public InternalNode(TKey key, INode<TKey,TValue> left, INode<TKey,TValue> right)
 			: this()
 		{		
 			Keys[0] = key;
@@ -17,20 +17,55 @@ namespace treap
 			Nodes[1] = right;
 			Count = 1;
 		}
-
-		public int Count;
-		public TKey[] Keys;
-		public INode[] Nodes;
+		/// <summary>
+		/// In this case the Count of Keys. Count of Nodes is Count + 1
+		/// </summary>
+		/// <value>The count.</value>
+		public int Count {get;set;}
+		public int NodeCount {get{return Count +1;}}
+		public TKey[] Keys {get; private set;}
+		public INode<TKey,TValue>[] Nodes;
 
 		public bool IsFull {get{
 				return Count == Keys.Length;
 			}
 		}
 
-		public void Add(TKey key, INode right, IComparer<TKey> comparer){
+		public void RemoveAt (int nodeIndex)
+		{		
+			if(nodeIndex < Count)
+				Algorithms.RemoveAt(Keys, nodeIndex, Count);	
+			else if(nodeIndex == Count && Count != 0) // remove last node means remove last key too
+				Algorithms.RemoveAt(Keys, nodeIndex-1, Count);
+			Algorithms.RemoveAt(Nodes, nodeIndex, Count+1);
+			Count--;
+		}
+
+		public void AddRight(INode<TKey,TValue> node, int count){
+			var leaf = (InternalNode<TKey,TValue>)node;
+			for(int i=Count, j=0;j <count;i++,j++)
+				Keys[i] = leaf.Keys[j];
+			for(int i=Count, j=0;j <count+1;i++,j++)
+				Nodes[i] = leaf.Nodes[j];
+			Count += count;
+		}
+
+		public void AddLeft(INode<TKey,TValue> node, int count){
+			var leaf = (InternalNode<TKey,TValue>)node;
+			Array.Copy(Keys,0, Keys, Count, count);
+			Array.Copy(Nodes,0, Nodes, NodeCount, count);
+
+			for(int i=0;i< count ;i++){
+				Keys[i] = leaf.Keys[i];
+				Nodes[i] = leaf.Nodes[i];
+			}		
+			Count+=count;
+		}
+
+		public void Add(TKey key, INode<TKey,TValue> right, IComparer<TKey> comparer){
 			var index = IndexOf(key, comparer);
 			Algorithms.Insert(Keys, key, index, Count);
-			Algorithms.Insert(Nodes, right, index+1, Count+1);
+			Algorithms.Insert(Nodes, right, index+1, NodeCount);
 			Count++;
 		}
 

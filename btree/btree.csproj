@@ -49,6 +49,7 @@
     <Compile Include="Btree\InternalNode.cs" />
     <Compile Include="Btree\LeafNode.cs" />
     <Compile Include="Btree\INode.cs" />
+    <Compile Include="Treap\TreapTest.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
