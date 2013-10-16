@@ -33,7 +33,7 @@ namespace treap
 
 		public static void Insert<T>(T[] array, T item, int index, int count){
 			if(index < count)			
-				Algorithms.Copy(array,index, array, index+1, count - index);
+				Array.Copy(array,index, array, index+1, count - index);
 			array[index] = item;
 		}
 
@@ -44,13 +44,13 @@ namespace treap
 
 		public static void RemoveAt <T>(T[] keys, int index, int count)
 		{
-			Algorithms.Copy(keys,index + 1, keys, index, count - index -1);
+			Array.Copy(keys,index + 1, keys, index, count - index -1);
 			Clear(keys, count -1);
 		}
 
 		public static void RemoveRange<T>(T[] keys, int index, int count, int existingCount){
 			var start = index + count;
-			Algorithms.Copy(keys, start, keys, index, existingCount - start);
+			Array.Copy(keys, start, keys, index, existingCount - start);
 		}
 	}
 }

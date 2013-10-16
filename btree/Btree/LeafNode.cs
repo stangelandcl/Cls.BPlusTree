@@ -40,8 +40,8 @@ namespace treap
 
 		public void AddLeft(INode<TKey,TValue> node, int count){
 			var leaf = (LeafNode<TKey,TValue>)node;
-			Algorithms.Copy(Keys,0, Keys, count, Count);
-			Algorithms.Copy(Values,0, Values, count, Count);
+			Array.Copy(Keys,0, Keys, count, Count);
+			Array.Copy(Values,0, Values, count, Count);
 
 			var start = leaf.Count - count;
 			for(int i=0, j = start;i< count ;i++, j++){
@@ -102,8 +102,8 @@ namespace treap
 			Count /= 2;
 			var half = Count;
 			var right = new LeafNode<TKey,TValue>();
-			Algorithms.Copy(Keys, half, right.Keys,0, half);
-			Algorithms.Copy(Values, half, right.Values,0, half);
+			Array.Copy(Keys, half, right.Keys,0, half);
+			Array.Copy(Values, half, right.Values,0, half);
 			right.Count = this.Count;
 			return new LeafSplit<TKey,TValue>{
 				Right = right,
