@@ -10,6 +10,7 @@ namespace treap
 		int Count {get; set;}
 		TKey[] Keys {get;}
 		void RemoveRange(int index, int count);
+		TKey FarRightKey();
 	}
 
 	public static class Constants{

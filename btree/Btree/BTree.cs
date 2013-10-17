@@ -60,7 +60,8 @@ namespace treap
 					iparent.Keys[leftIndex] = left.Keys[left.Count-1];
 					return;
 				}
-			}else if(index < iparent.Count-1){
+			}
+			if(index < iparent.Count-1){
 				var rightIndex = index+1;
 				var right = iparent.Nodes[rightIndex];
 				if(right.Count > Constants.MinimumSize){
@@ -75,10 +76,13 @@ namespace treap
 				var leftIndex = index -1;
 				var left = iparent.Nodes[leftIndex];
 				left.AddRight(node, node.Count);
-				iparent.Keys[leftIndex] = left.Keys[left.Count-1];
+				iparent.Keys[leftIndex] = left.FarRightKey();
 				iparent.RemoveAt(index);
+				node = null;
 				return;
-			}else if(index < iparent.Count -1){
+			}
+
+			if(index < iparent.Count -1){
 				var rightIndex = index + 1;
 				var right = iparent.Nodes[rightIndex];
 				right.AddLeft(node, node.Count);

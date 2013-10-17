@@ -51,7 +51,7 @@ namespace treap
 
 		[Test]
 		public static void Test(){
-			const int Count = 1000000;
+			const int Count = 1000*1000;
 
 			var tree = new BTree<int,int>();
 			Assert.AreEqual(tree.Count, 0);
@@ -138,7 +138,7 @@ namespace treap
 //			count = treap.Count;
 			TestOrder(tree, new HashSet<int>());
 			for(int i=0;i<items.Length;i++){
-				if(i % 1000 == 0) 
+				if(i % 100 == 0) 
 					Console.WriteLine("Tested " + i);
 				tree.Remove(items[i]);
 				var notIn = new HashSet<int>(items.Take(i+1));

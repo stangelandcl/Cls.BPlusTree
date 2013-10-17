@@ -21,6 +21,7 @@ namespace treap
 		public int Count {get;set;}
 		public TKey[] Keys {get; private set;}
 		public TValue[] Values;
+		public TKey FarRightKey() { return Keys[Count-1]; }
 
 		public void RemoveAt(int index){
 			Algorithms.RemoveAt(Keys, index, Count);
@@ -40,8 +41,8 @@ namespace treap
 
 		public void AddLeft(INode<TKey,TValue> node, int count){
 			var leaf = (LeafNode<TKey,TValue>)node;
-			Array.Copy(Keys,0, Keys, count, Count);
-			Array.Copy(Values,0, Values, count, Count);
+			Algorithms.Copy(Keys,0, Keys, count, Count);
+			Algorithms.Copy(Values,0, Values, count, Count);
 
 			var start = leaf.Count - count;
 			for(int i=0, j = start;i< count ;i++, j++){
@@ -62,7 +63,7 @@ namespace treap
 		{
 			var index = Array.BinarySearch(Keys, 0, Count, key, comparer);
 			if(index < 0) return false;
-			RemoveAt(index);
+			RemoveAt(index); 
 			return true;
 		}
 
@@ -102,8 +103,8 @@ namespace treap
 			Count /= 2;
 			var half = Count;
 			var right = new LeafNode<TKey,TValue>();
-			Array.Copy(Keys, half, right.Keys,0, half);
-			Array.Copy(Values, half, right.Values,0, half);
+			Algorithms.Copy(Keys, half, right.Keys,0, half);
+			Algorithms.Copy(Values, half, right.Values,0, half);
 			right.Count = this.Count;
 			return new LeafSplit<TKey,TValue>{
 				Right = right,

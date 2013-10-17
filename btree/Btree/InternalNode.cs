@@ -26,9 +26,23 @@ namespace treap
 		public TKey[] Keys {get; private set;}
 		public INode<TKey,TValue>[] Nodes;
 
-		public bool IsFull {get{
-				return Count == Keys.Length;
+		public bool IsFull {get{return Count == Keys.Length;}}
+		public TKey FarRightKey() { return FarRightKey(this);}
+		TKey FarRightKey(INode<TKey, TValue> node){
+			while(!(node is LeafNode<TKey,TValue>)){
+				var x = ((InternalNode<TKey, TValue>)node);
+				node = x.Nodes[x.NodeCount-1];
 			}
+			var leaf = (LeafNode<TKey,TValue>)node;
+			return leaf.Keys[leaf.Count-1];
+		}
+
+		TKey FarLeftKey(INode<TKey, TValue> node){
+			while(!(node is LeafNode<TKey,TValue>)){
+				node = ((InternalNode<TKey, TValue>)node).Nodes[0];
+			}
+			var leaf = (LeafNode<TKey,TValue>)node;
+			return leaf.Keys[0];
 		}
 
 		public void RemoveAt (int nodeIndex)
@@ -50,8 +64,10 @@ namespace treap
 
 		public void AddRight(INode<TKey,TValue> node, int count){
 			var leaf = (InternalNode<TKey,TValue>)node;
+			Keys[Count] = FarRightKey(this);
+			Count++;
 			for(int i=Count, j=0;j <count;i++,j++)
-				Keys[i] = leaf.Keys[j];
+				Keys[i] = leaf.Keys[j];			
 			for(int i=Count, j=0;j <count+1;i++,j++)
 				Nodes[i] = leaf.Nodes[j];
 			node.RemoveRange(0, count);
@@ -60,16 +76,18 @@ namespace treap
 
 		public void AddLeft(INode<TKey,TValue> node, int count){
 			var leaf = (InternalNode<TKey,TValue>)node;
-			Array.Copy(Keys,0, Keys, count, Count);
+			Array.Copy(Keys,0, Keys, count+1, Count);
 			Array.Copy(Nodes,0, Nodes, count, Count + 1);
-
 			var start = leaf.Count - count;
 			for(int i=0,j=start;i< count ;i++, j++){
 				Keys[i] = leaf.Keys[j];
 				Nodes[i] = leaf.Nodes[j];
-			}		
+			}
+			Nodes[count] = leaf.Nodes[count];
+			var noKeyNode = Nodes[count];
+			Keys[count] = FarRightKey(noKeyNode);
 			node.RemoveRange(start, count);
-			Count+=count;
+			Count+=count+1;
 		}
 
 		public void Add(TKey key, INode<TKey,TValue> right, IComparer<TKey> comparer){
