@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Diagnostics;
 
 namespace btree
 {
+    [DebuggerDisplay("Keys={Keys.Count}")]
 	public class Leaf<TKey, TValue> : INode<TKey, TValue>, IEnumerable<KeyValuePair<TKey,TValue>>
 	{
 		public Leaf(){
@@ -13,13 +15,16 @@ namespace btree
 			foreach (var k in kvp)
 				Add (k.Key, k.Value, comparer);
 		}
-		public void AddRange(INode<TKey,TValue> node, IComparer<TKey> comparer){
+		public void AddRange(INode<TKey,TValue> node, IComparer<TKey> comparer)
+        {
 			AddRange (((Leaf<TKey,TValue>)node).AsEnumerable(), comparer);
 		}
-		public void AddFromLeft(INode<TKey,TValue> node, IComparer<TKey> comparer){
+		public void AddFromLeft(INode<TKey,TValue> node, IComparer<TKey> comparer)
+        {
 			AddRange (((Leaf<TKey,TValue>)node).TakeLeft (), comparer);
 		}
-		public void AddFromRight(INode<TKey,TValue> node, IComparer<TKey> comparer){
+		public void AddFromRight(INode<TKey,TValue> node, IComparer<TKey> comparer)
+        {
 			AddRange (((Leaf<TKey,TValue>)node).TakeRight (), comparer);
 		}
 

@@ -9,17 +9,38 @@ namespace btree
 		public static void Main (string[] args)
 		{
 			var tree = new BTree<int,int> ();
-			var rand = new Random ();
-			var items = Enumerable.Range (0, 129).Select (n => rand.Next ()).Distinct ().ToArray ();
+			var rand = new Random (1);
+			var items = Enumerable.Range (0, 100000).Select (n => rand.Next ()).Distinct ().ToArray ();
 
 			TestAdd (tree, items);
 			var set = new HashSet<int> (items);
+            int i = 0;
 			foreach (var item in items) {
 				tree.Remove (item);
 				set.Remove (item);
-				Verify (tree);
+                if (!tree.Verify())
+                    throw new Exception("Invalid tree at " + i);
+                //if (tree.Count() != set.Count())
+                //    throw new Exception("Count mismatch at i=" + i);
+                //if(++i % 10001 == 0)
+                //Verify (tree);
+                if (++i % 10 == 0)
+                {
+                    Console.WriteLine(i);
+                    AssertEqual(tree, set);
+                }
 			}
 		}
+
+        static void AssertEqual(BTree<int, int> tree, HashSet<int> set)
+        {
+            var s2 = new HashSet<int>(set);
+            foreach (var t in tree)            
+                if (!s2.Remove(t.Key))
+                    throw new Exception("Missing " + t.Key);
+            if (s2.Count != 0)
+                throw new Exception("remove failed " + s2.Count);
+        }
 
 		static void TestAdd (BTree<int, int> tree, int[] items)
 		{

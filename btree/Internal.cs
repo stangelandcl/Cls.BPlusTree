@@ -1,13 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Diagnostics;
 
 namespace btree
 {
+    [DebuggerDisplay("Nodes={Nodes.Count} Keys={Keys.Count}")]
 	public class Internal<TKey,TValue> : INode<TKey, TValue>, IEnumerable<INode<TKey,TValue>>
 	{
 		public Internal(){
 			Keys = new List<TKey> ();
+            Nodes = new List<INode<TKey, TValue>>();
 		}
 
 		public void AddRange(IEnumerable<INode<TKey,TValue>> nodes, IComparer<TKey> comparer){
@@ -30,7 +33,7 @@ namespace btree
 			var index = Keys.BinarySearch (node.Keys [0], comparer);
 			if (index >= 0) {
 				Keys [index] = node.Keys [0];
-				nodes [index] = node;
+				Nodes [index] = node;
 				return true;
 			}
 			
@@ -38,7 +41,7 @@ namespace btree
 			index = ~index;
 
 			Keys.Insert (index, node.Keys [0]);
-			nodes.Insert (index, node);
+			Nodes.Insert (index, node);
 			return true;
 		}
 
@@ -52,7 +55,7 @@ namespace btree
 			}
 			if (comparer.Compare (key, Keys [index]) < 0)
 				Keys [index] = key;
-			return nodes [index];
+			return Nodes [index];
 		}
 
 		public INode<TKey,TValue> Split(){
@@ -60,45 +63,45 @@ namespace btree
 			var count = Constants.NodeSize / 2;
 			right.Keys.AddRange (Keys.GetRange (count, count));
 			Keys.RemoveRange (count, count);
-			right.nodes.AddRange (nodes.GetRange (count, count));
-			nodes.RemoveRange (count, count);
+			right.Nodes.AddRange (Nodes.GetRange (count, count));
+			Nodes.RemoveRange (count, count);
 			return right;
 		}
 
 		public int Count { get { return Keys.Count; } }
 		public List<TKey> Keys {get; private set;}
-		List<INode<TKey,TValue>> nodes = new List<INode<TKey, TValue>>();
+        public List<INode<TKey, TValue>> Nodes { get; private set; }
 
 		public INode<TKey,TValue> Left(INode<TKey,TValue> node){
-			var i = nodes.IndexOf (node) - 1;
-			if(i >= 0) return nodes[i];
+			var i = Nodes.IndexOf (node) - 1;
+			if(i >= 0) return Nodes[i];
 			return null;
 		}
 
 		public INode<TKey,TValue> Right(INode<TKey,TValue> node){
-			var i = nodes.IndexOf (node) + 1;
-			if(i < nodes.Count) return nodes[i];
+			var i = Nodes.IndexOf (node) + 1;
+			if(i < Nodes.Count) return Nodes[i];
 			return null;
 		}
 
 		public void Update(INode<TKey,TValue> node){
-			var i = nodes.IndexOf (node);
+			var i = Nodes.IndexOf (node);
 			Keys [i] = node.Keys [0];
 		}
 
 		public void Remove(INode<TKey,TValue> node){
-			var index = nodes.IndexOf (node);
+			var index = Nodes.IndexOf (node);
 			Keys.RemoveAt (index);
-			nodes.RemoveAt (index);
+			Nodes.RemoveAt (index);
 		}
 
 		public INode<TKey,TValue>[] TakeLeft(){
 			var count = Math.Max ((Constants.NodeSize - Count) / 2, 1);
 			var items = new INode<TKey,TValue>[count];
 			for (int i=0; i<items.Length; i++)
-				items [i] = nodes [i];
+				items [i] = Nodes [i];
 			Keys.RemoveRange (0, count);
-			nodes.RemoveRange (0, count);
+			Nodes.RemoveRange (0, count);
 			return items;
 		}
 		public INode<TKey,TValue>[] TakeRight(){
@@ -106,19 +109,26 @@ namespace btree
 			var items = new INode<TKey,TValue>[count];
 			for(int i=0;i<items.Length;i++){
 				var x = Keys.Count - count + i;
-				items [i] = nodes [x];
+				items [i] = Nodes [x];
 			}
 			Keys.RemoveRange (Keys.Count - count, count);
-			nodes.RemoveRange (nodes.Count - count, count);
+			Nodes.RemoveRange (Nodes.Count - count, count);
 			return items;
 		}
+
+        public void Replace(INode<TKey, TValue> oldNode, INode<TKey, TValue> newNode)
+        {
+            var i = Nodes.IndexOf(oldNode);
+            Nodes[i] = newNode;
+            Keys[i] = newNode.Keys[0];
+        }
 
 
 		#region IEnumerable implementation
 
 		public IEnumerator<INode<TKey, TValue>> GetEnumerator ()
 		{
-			return nodes.GetEnumerator ();
+			return Nodes.GetEnumerator ();
 		}
 
 		#endregion

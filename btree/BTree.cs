@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace btree
 {
@@ -84,85 +85,137 @@ namespace btree
 				root = null;
 		}
 
-		bool Rebalance(INode<TKey, TValue> parentNode, INode<TKey,TValue> leaf, ref INode<TKey,TValue> newParent, TKey key){
+        struct RebalanceResult
+        {
+            public bool Rebalanced;
+            public INode<TKey, TValue> NewParent;
+            public static readonly RebalanceResult Empty = new RebalanceResult();
+        }
+
+		RebalanceResult Rebalance(INode<TKey, TValue> parentNode, INode<TKey,TValue> leaf, TKey key){
 			var parent = (Internal<TKey,TValue>)parentNode;
-			if (leaf.Count >= Constants.MinNodeSize)
-				return false;
+            if (leaf.Count >= Constants.MinNodeSize)
+                return RebalanceResult.Empty;
 
 			var left = parent.Left (leaf);
 			if (left != null && left.Count > Constants.MinNodeSize) {
 				leaf.AddFromRight (left, comparer);			
 				parent.Update (leaf);
-				return false;
+				return RebalanceResult.Empty;
 			}
 
 			var right = parent.Right (leaf);
 			if (right != null && right.Count > Constants.MinNodeSize) {
-				left.AddFromLeft (right, comparer);
+				leaf.AddFromLeft (right, comparer);
 				parent.Update (right);
-				return false;
+				return RebalanceResult.Empty;
 			}
 
 			if (left != null) {
 				left.AddRange (leaf, comparer);
 				parent.Remove (leaf);
-				return true;
+                return new RebalanceResult { Rebalanced = true };
 			}
 
 			if (right != null) {
 				right.AddRange (leaf, comparer);
 				parent.Remove (leaf);
-				return true;
+                return new RebalanceResult { Rebalanced = true } ;
 			}
-
-			newParent = leaf;
-			return true;
+            return new RebalanceResult
+            {
+                NewParent = leaf,
+                Rebalanced = true,
+            };			
 		}
 
-		bool Remove(INode<TKey,TValue> parent, INode<TKey,TValue> child, ref INode<TKey,TValue> newParent, TKey key){
+		RebalanceResult Remove(INode<TKey,TValue> parent, INode<TKey,TValue> child, TKey key){
 			var leaf = child as Leaf<TKey, TValue>;
-			if (leaf == null) {
-				var c2 = ((Internal<TKey,TValue>)child).GetNode (key, comparer);
-				if (Remove (child, c2, key))
-					return Rebalance (parent, child, key);
-				return false;
-			}
-
-			if (!leaf.Remove (key, comparer)) 
-				return false;
-
-			INode<TKey,TValue> n = null;
-			bool reb = Rebalance (parent, leaf, ref n, key);
-			if(reb){
-				if(n != null) 
-			}
+            if (leaf != null)
+            {
+                if (!leaf.Remove(key, comparer))
+                    return RebalanceResult.Empty;
+            
+                return Rebalance(parent, leaf, key);
+            }
+			
+			var grandChild = ((Internal<TKey,TValue>)child).GetNode (key, comparer);
+			var removed = Remove (child, grandChild, key);
+            if (removed.Rebalanced)
+            {
+                if (removed.NewParent != null)
+                {
+                    ((Internal<TKey,TValue>)parent).Replace(child, grandChild);
+                }
+                return Rebalance(parent, child, key);
+            }
+            return RebalanceResult.Empty;										
 		}
 
 		void RemoveRootInternal(TKey key){
 			var node = (Internal<TKey,TValue>)root;
-			var next = node.GetNode (key, comparer);
-			INode<TKey,TValue> n = null;
-			Remove (node, next, ref n, key);
-			if (n != null)	root = n;
+			var next = node.GetNode (key, comparer);			
+            var removed = Remove(node, next, key);
+            if (removed.Rebalanced)
+            {
+                if (removed.NewParent != null)                
+                    root = removed.NewParent;                
+            }			
 		}
 
 		public void Remove(TKey key){
-			if(root == null) return;
+			if(root == null) 
+                return;
+
 			if (root is Leaf<TKey,TValue>) {
 				RemoveRootLeaf (key);
 				return;
 			}
 
-			RemoveRootInternal (key);
+			RemoveRootInternal (key);                      
 		}
 
+        public bool Verify()
+        {
+            if (root == null) return true;
+            foreach (var node in this.Nodes)
+                if (node != root && node.Keys.Count < Constants.MinNodeSize)
+                    return false;
+            return true;
+        }
+
+        IEnumerable<INode<TKey, TValue>> Nodes
+        {
+            get
+            {
+                if (root == null) 
+                    return Enumerable.Empty<INode<TKey, TValue>>();
+                return NodesOf(root);
+            }
+        }
+
+        IEnumerable<INode<TKey, TValue>> NodesOf(INode<TKey, TValue> node)
+        {
+            var n = node as Leaf<TKey, TValue>;
+            if (n != null)
+                yield return n;
+            else
+            {
+                yield return node;
+                foreach (var x in ((Internal<TKey, TValue>)node).Nodes)
+                    foreach (var item in NodesOf(x))
+                        yield return item;
+            }
+        }
+
 		IEnumerable<KeyValuePair<TKey,TValue>> NodeItems(INode<TKey, TValue> node){
-			if (node is Leaf<TKey,TValue>) 
-				foreach (var item in (Leaf<TKey,TValue>)node)
+            var n = node as Leaf<TKey, TValue>;
+			if (n != null) 
+				foreach (var item in n)
 					yield return item;
 			else 
-				foreach(var n in (Internal<TKey,TValue>)node)
-					foreach(var item in NodeItems(n))
+				foreach(var x in (Internal<TKey,TValue>)node)
+					foreach(var item in NodeItems(x))
 						yield return item;
 		}
 	
