@@ -52,7 +52,7 @@ namespace btree
 				node = parent;
 			}
 
-			var next = node.GetNode (key, comparer);
+			var next = node.GetNode (key, true, comparer);
 			var asInternal = next as Internal<TKey,TValue>;
 			if (asInternal != null)
 				AddInternal (ref node, asInternal, key, value);			
@@ -92,8 +92,9 @@ namespace btree
             public static readonly RebalanceResult Empty = new RebalanceResult();
         }
 
-		RebalanceResult Rebalance(INode<TKey, TValue> parentNode, INode<TKey,TValue> leaf, TKey key){
+		RebalanceResult Rebalance(INode<TKey, TValue> parentNode, INode<TKey,TValue> leaf){
 			var parent = (Internal<TKey,TValue>)parentNode;
+           
             if (leaf.Count >= Constants.MinNodeSize)
                 return RebalanceResult.Empty;
 
@@ -113,12 +114,14 @@ namespace btree
 
 			if (left != null) {
 				left.AddRange (leaf, comparer);
+                parent.Update(left);
 				parent.Remove (leaf);
                 return new RebalanceResult { Rebalanced = true };
 			}
 
 			if (right != null) {
 				right.AddRange (leaf, comparer);
+                parent.Update(right);
 				parent.Remove (leaf);
                 return new RebalanceResult { Rebalanced = true } ;
 			}
@@ -135,26 +138,27 @@ namespace btree
             {
                 if (!leaf.Remove(key, comparer))
                     return RebalanceResult.Empty;
-            
-                return Rebalance(parent, leaf, key);
+                ((Internal<TKey, TValue>)parent).Update(child);
+                return Rebalance(parent, leaf);
             }
 			
-			var grandChild = ((Internal<TKey,TValue>)child).GetNode (key, comparer);
+			var grandChild = ((Internal<TKey,TValue>)child).GetNode (key, false, comparer);
 			var removed = Remove (child, grandChild, key);
+            ((Internal<TKey, TValue>)parent).Update(child);
             if (removed.Rebalanced)
             {
                 if (removed.NewParent != null)
                 {
                     ((Internal<TKey,TValue>)parent).Replace(child, grandChild);
                 }
-                return Rebalance(parent, child, key);
+                return Rebalance(parent, child);
             }
             return RebalanceResult.Empty;										
 		}
 
 		void RemoveRootInternal(TKey key){
 			var node = (Internal<TKey,TValue>)root;
-			var next = node.GetNode (key, comparer);			
+			var next = node.GetNode (key, false, comparer);			
             var removed = Remove(node, next, key);
             if (removed.Rebalanced)
             {
@@ -202,9 +206,15 @@ namespace btree
             else
             {
                 yield return node;
-                foreach (var x in ((Internal<TKey, TValue>)node).Nodes)
+                var i = ((Internal<TKey, TValue>)node);
+                int j=0;
+                foreach (var x in i.Nodes)
+                {
+                    if (comparer.Compare(x.Keys[0], i.Keys[j++]) != 0)
+                        throw new Exception("Mismatch " + x.Keys[0] + " " + i.Keys[j - 1]);
                     foreach (var item in NodesOf(x))
                         yield return item;
+                }
             }
         }
 

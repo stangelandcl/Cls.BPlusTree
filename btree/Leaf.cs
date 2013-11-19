@@ -29,7 +29,7 @@ namespace btree
 		}
 
 		public KeyValuePair<TKey,TValue>[] TakeLeft(){
-			var count = Math.Max ((Constants.NodeSize - Count) / 2, 1);
+            var count = Constants.TakeCount(this);
 			var items = new KeyValuePair<TKey,TValue>[count];
 			for (int i=0; i<items.Length; i++)
 				items [i] = new KeyValuePair<TKey, TValue> (Keys [i], values [i]);
@@ -38,7 +38,7 @@ namespace btree
 			return items;
 		}
 		public KeyValuePair<TKey,TValue>[] TakeRight(){
-			var count = Math.Max ((Count - Constants.MinNodeSize) / 2, 1);
+            var count = Constants.TakeCount(this);
 			var items = new KeyValuePair<TKey,TValue>[count];
 			for(int i=0;i<items.Length;i++){
 				var x = Keys.Count - count + i;
@@ -47,7 +47,7 @@ namespace btree
 			Keys.RemoveRange (Keys.Count - count, count);
 			values.RemoveRange (values.Count - count, count);
 			return items;
-		}
+		}       
 
 		public bool Add(TKey key, TValue value, IComparer<TKey> comparer){
 			var index = Keys.BinarySearch (key, comparer);

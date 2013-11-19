@@ -10,26 +10,33 @@ namespace btree
 		{
 			var tree = new BTree<int,int> ();
 			var rand = new Random (1);
-			var items = Enumerable.Range (0, 100000).Select (n => rand.Next ()).Distinct ().ToArray ();
+			var items = Enumerable.Range (0, 3000000).Select (n => rand.Next ()).Distinct ().ToArray ();
 
 			TestAdd (tree, items);
 			var set = new HashSet<int> (items);
             int i = 0;
+            
 			foreach (var item in items) {
 				tree.Remove (item);
 				set.Remove (item);
-                if (!tree.Verify())
-                    throw new Exception("Invalid tree at " + i);
+              
                 //if (tree.Count() != set.Count())
                 //    throw new Exception("Count mismatch at i=" + i);
                 //if(++i % 10001 == 0)
                 //Verify (tree);
-                if (++i % 10 == 0)
+                //AssertEqual(tree, set);
+                i++;
+                if (i % 10001 == 0 )
                 {
                     Console.WriteLine(i);
-                    AssertEqual(tree, set);
+                    //AssertEqual(tree, set);
+                    //if (!tree.Verify())
+                    //    throw new Exception("Invalid tree at " + i);
+                   // Verify(tree);
+                  
                 }
 			}
+            tree.Verify();
 		}
 
         static void AssertEqual(BTree<int, int> tree, HashSet<int> set)
@@ -53,6 +60,7 @@ namespace btree
 				}
 			}
 			Verify (tree);
+            tree.Verify();
 		}
 
 		static void Verify (BTree<int, int> tree)

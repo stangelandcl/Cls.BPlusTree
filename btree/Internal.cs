@@ -47,14 +47,14 @@ namespace btree
 
 		public bool IsFull{ get { return Keys.Count == Constants.NodeSize; } }
 
-		public INode<TKey,TValue> GetNode(TKey key, IComparer<TKey> comparer){
+		public INode<TKey,TValue> GetNode(TKey key, bool replaceIfLower, IComparer<TKey> comparer){
 			var index = Keys.BinarySearch (key, comparer);
 			if (index < 0) {
-				index = ~index;
+				index = ~index;              
 				if(index > 0) index --;
 			}
-			if (comparer.Compare (key, Keys [index]) < 0)
-				Keys [index] = key;
+            if (replaceIfLower && comparer.Compare (key, Keys [index]) < 0)
+                Keys [index] = key;
 			return Nodes [index];
 		}
 
@@ -96,7 +96,7 @@ namespace btree
 		}
 
 		public INode<TKey,TValue>[] TakeLeft(){
-			var count = Math.Max ((Constants.NodeSize - Count) / 2, 1);
+            var count = Constants.TakeCount(this);
 			var items = new INode<TKey,TValue>[count];
 			for (int i=0; i<items.Length; i++)
 				items [i] = Nodes [i];
@@ -105,7 +105,7 @@ namespace btree
 			return items;
 		}
 		public INode<TKey,TValue>[] TakeRight(){
-			var count = Math.Max ((Constants.NodeSize - Count) / 2, 1);
+            var count = Constants.TakeCount(this);
 			var items = new INode<TKey,TValue>[count];
 			for(int i=0;i<items.Length;i++){
 				var x = Keys.Count - count + i;
@@ -121,7 +121,7 @@ namespace btree
             var i = Nodes.IndexOf(oldNode);
             Nodes[i] = newNode;
             Keys[i] = newNode.Keys[0];
-        }
+        }        
 
 
 		#region IEnumerable implementation
