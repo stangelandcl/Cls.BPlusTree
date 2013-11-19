@@ -85,6 +85,19 @@ namespace btree
 			return true;
 		}
 
+        public bool TryGetValue(TKey key, out TValue value, IComparer<TKey> comparer)
+        {
+            var index = Keys.BinarySearch(key, comparer);
+            if (index >= 0)
+            {
+                value = values[index];
+                return true;
+            }
+
+            value = default(TValue);
+            return false;
+        }
+
 		#region IEnumerable implementation
 
 
