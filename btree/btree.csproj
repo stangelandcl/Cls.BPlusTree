@@ -35,21 +35,21 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BTree_Add.cs" />
-    <Compile Include="BTreeCursor.cs" />
-    <Compile Include="BTree_Dictionary.cs" />
-    <Compile Include="BTree_Remove.cs" />
-    <Compile Include="BTree_Search.cs" />
-    <Compile Include="BTree_Verify.cs" />
-    <Compile Include="ISortedDictionary.cs" />
-    <Compile Include="KeyPosition.cs" />
+    <Compile Include="BTree\BTree_Add.cs" />
+    <Compile Include="Nodes\Cursor.cs" />
+    <Compile Include="BTree\BTree_Dictionary.cs" />
+    <Compile Include="BTree\BTree_Remove.cs" />
+    <Compile Include="BTree\BTree_Search.cs" />
+    <Compile Include="BTree\BTree_Verify.cs" />
+    <Compile Include="Interfaces\ISortedDictionary.cs" />
+    <Compile Include="Nodes\KeyPosition.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="BTreeDictionary.cs" />
-    <Compile Include="Leaf.cs" />
-    <Compile Include="Constants.cs" />
-    <Compile Include="Internal.cs" />
-    <Compile Include="INode.cs" />
+    <Compile Include="BTree\BTree.cs" />
+    <Compile Include="Nodes\Leaf.cs" />
+    <Compile Include="Nodes\Constants.cs" />
+    <Compile Include="Nodes\Internal.cs" />
+    <Compile Include="Nodes\INode.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

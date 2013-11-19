@@ -5,8 +5,9 @@ using System.Text;
 
 namespace btree
 {
-    public partial class BTree<TKey, TValue> 
+    public partial class BTree<TKey, TValue>
     {
+
         public bool ContainsKey(TKey key)
         {
             TValue value;
@@ -79,5 +80,6 @@ namespace btree
         {
             return ((IDictionary<TKey, TValue>)this).Remove(item.Key);
         }
+
     }
 }
