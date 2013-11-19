@@ -47,17 +47,22 @@ namespace btree
 
 		public bool IsFull{ get { return Keys.Count == Constants.NodeSize; } }
 
-		internal NodeIndex<TKey, TValue> GetNode(TKey key, bool replaceIfLower, IComparer<TKey> comparer)
+		internal NodeIndex<TKey, TValue> GetNode(TKey key, IComparer<TKey> comparer)
         {
 			var index = Keys.BinarySearch (key, comparer);
 			if (index < 0) {
 				index = ~index;              
 				if(index > 0) index --;
-			}
-            if (replaceIfLower && comparer.Compare (key, Keys [index]) < 0)
-                Keys [index] = key;
+			}           
             return new NodeIndex<TKey, TValue> { Index = index, Node = Nodes[index] };
 		}
+
+        internal void UpdateNode(int index, TKey key, IComparer<TKey> comparer)
+        {
+            if (comparer.Compare(key, Keys[index]) < 0)
+                Keys[index] = key;
+        }
+   
 
 		public INode<TKey,TValue> Split(){
 			var right = new Internal<TKey,TValue> ();

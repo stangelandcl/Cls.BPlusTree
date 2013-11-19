@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace btree
 {
@@ -11,6 +12,8 @@ namespace btree
 			var tree = new BTree<int,int> ();
 			var rand = new Random (1);
 			var items = Enumerable.Range (0, 3000000).Select (n => rand.Next ()).Distinct ().ToArray ();
+
+            PerformanceTest(items);
 
 			TestAdd (tree, items);
 			var set = new HashSet<int> (items);
@@ -38,6 +41,52 @@ namespace btree
 			}
             tree.Verify();
 		}
+
+        static void PerformanceTest(IEnumerable<int> items)
+        {
+            var map = new Dictionary<int, int>();
+            var tree = new BTree<int, int>();
+
+            var gc = GC.GetTotalMemory(true);
+            var sw = Stopwatch.StartNew();
+            foreach (var item in items)            
+                map[item] = item;
+            var e = sw.Elapsed;
+            var mem = GC.GetTotalMemory(true) - gc;
+            Console.WriteLine("map write " + e + " mem: " + mem);
+
+            gc = GC.GetTotalMemory(true);
+            sw = Stopwatch.StartNew();
+            foreach (var item in items)            
+                tree[item] = item;
+            e = sw.Elapsed;
+            var mem2 = GC.GetTotalMemory(true) - gc;
+            Console.WriteLine("tree write " + e + "  mem: " + mem2);
+            Console.WriteLine("Memory diff: tree uses " + Math.Round((double)mem2 / mem * 100, 2) + "% of dictionary memory");
+
+            sw = Stopwatch.StartNew();
+            foreach (var item in items)
+            {
+                var x = map[item];
+            }         
+            Console.WriteLine("map read " + sw.Elapsed);
+
+            sw = Stopwatch.StartNew();
+            foreach (var item in items)
+            {
+                var x = tree[item];
+            }
+            Console.WriteLine("tree read " + sw.Elapsed);
+
+            sw = Stopwatch.StartNew();
+            foreach (var item in items)
+            {
+                var x = tree[item];
+                var y = map[item];
+                if (x != y) throw new Exception("mismatch " + item);
+            }
+            Console.WriteLine("tree read " + sw.Elapsed);
+        }
 
         static void AssertEqual(BTree<int, int> tree, HashSet<int> set)
         {

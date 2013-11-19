@@ -70,13 +70,14 @@ namespace btree
                 node = parent;
             }
 
-            var next = node.GetNode(key, true, comparer).Node;
-            var asInternal = next as Internal<TKey, TValue>;
+            var next = node.GetNode(key, comparer);
+            node.UpdateNode(next.Index, key, comparer);
+            var asInternal = next.Node as Internal<TKey, TValue>;
             if (asInternal != null)
                 AddInternal(ref node, asInternal, key, value);
             else
             {
-                var r = (Leaf<TKey, TValue>)next;
+                var r = (Leaf<TKey, TValue>)next.Node;
                 if (r.Add(key, value, comparer)) return;
                 node.Add(r.Split(), comparer);
                 AddInternal(ref parent, node, key, value);

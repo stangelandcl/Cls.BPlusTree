@@ -24,7 +24,7 @@ namespace btree
             if (leaf != null)
                 return leaf.TryGetValue(key, out value, comparer);
             var i = (Internal<TKey,TValue>)node;
-            return TryGetValue(key, out value, i.GetNode(key, false, comparer).Node);            
+            return TryGetValue(key, out value, i.GetNode(key, comparer).Node);            
         }
 
         internal KeyPosition<TKey, TValue> MoveTo(TKey key)
@@ -42,7 +42,7 @@ namespace btree
             var i = node as Internal<TKey, TValue>;
             if (i == null)
             {
-                var val = i.GetNode(key, false, comparer);
+                var val = i.GetNode(key, comparer);
                 nodes.Push(KeyIndex.New(val.Index, node));
                 MoveTo(key, nodes, val.Node);
                 return;

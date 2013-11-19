@@ -31,7 +31,7 @@ namespace btree
         void RemoveRootInternal(TKey key)
         {
             var node = (Internal<TKey, TValue>)root;
-            var next = node.GetNode(key, false, comparer);
+            var next = node.GetNode(key, comparer);
             var removed = Remove(node, next.Node, key);
             if (removed.Rebalanced)
             {
@@ -51,7 +51,7 @@ namespace btree
                 return Rebalance(parent, leaf);
             }
 
-            var grandChild = ((Internal<TKey, TValue>)child).GetNode(key, false, comparer);
+            var grandChild = ((Internal<TKey, TValue>)child).GetNode(key, comparer);
             var removed = Remove(child, grandChild.Node, key);
             ((Internal<TKey, TValue>)parent).Update(child);
             if (removed.Rebalanced)
