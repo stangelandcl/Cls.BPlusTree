@@ -5,7 +5,7 @@ using System.Text;
 
 namespace btree
 {
-    public partial class BTree<TKey, TValue>
+    public partial class BTreeDictionary<TKey, TValue>
     {
 
         public bool ContainsKey(TKey key)

@@ -5,15 +5,14 @@ using System.Text;
 
 namespace btree
 {
-    public partial class BTree<TKey, TValue> 
+    public partial class BTreeDictionary<TKey, TValue> 
     {
-        public bool Verify()
+        public void Verify()
         {
-            if (root == null) return true;
+            if (root == null) return;
             foreach (var node in this.Nodes)
                 if (node != root && node.Keys.Count < Constants.MinNodeSize)
-                    return false;
-            return true;
+                    throw new Exception("Verify failed");            
         }
 
         IEnumerable<INode<TKey, TValue>> Nodes

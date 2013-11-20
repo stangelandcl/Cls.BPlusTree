@@ -4,9 +4,9 @@ using System.Linq;
 
 namespace btree
 {
-	public partial class BTree<TKey, TValue> : IDictionary<TKey,TValue>
+	public partial class BTreeDictionary<TKey, TValue> : IDictionary<TKey,TValue>
 	{
-		public BTree (IComparer<TKey> comparer = null)
+		public BTreeDictionary (IComparer<TKey> comparer = null)
 		{
 			this.comparer = this.comparer ?? Comparer<TKey>.Default;
 		}

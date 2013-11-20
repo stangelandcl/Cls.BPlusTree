@@ -9,9 +9,9 @@ namespace btree
 	{
 		public static void Main (string[] args)
 		{
-			var tree = new BTree<int,int> ();
+			var tree = new BTreeDictionary<int,int> ();
 			var rand = new Random (1);
-			var items = Enumerable.Range (0, 3000000).Select (n => rand.Next ()).Distinct ().ToArray ();
+			var items = Enumerable.Range (0, int.MaxValue).Select (n => rand.Next ()).Distinct ().Take(3*1000*1000).ToArray ();
 
             PerformanceTest(items);
 
@@ -32,9 +32,9 @@ namespace btree
                 if (i % 10001 == 0 )
                 {
                     Console.WriteLine(i);
-                    //AssertEqual(tree, set);
-                    //if (!tree.Verify())
-                    //    throw new Exception("Invalid tree at " + i);
+                    AssertEqual(tree, set);
+                    tree.Verify();
+                     
                    // Verify(tree);
                   
                 }
@@ -42,10 +42,10 @@ namespace btree
             tree.Verify();
 		}
 
-        static void PerformanceTest(IEnumerable<int> items)
+        static void PerformanceTest(int[] items)
         {
             var map = new Dictionary<int, int>();
-            var tree = new BTree<int, int>();
+            var tree = new BTreeDictionary<int, int>();
 
             var gc = GC.GetTotalMemory(true);
             var sw = Stopwatch.StartNew();
@@ -85,10 +85,25 @@ namespace btree
                 var y = map[item];
                 if (x != y) throw new Exception("mismatch " + item);
             }
-            Console.WriteLine("tree read " + sw.Elapsed);
+            Console.WriteLine("tree compare " + sw.Elapsed);
+
+            sw = Stopwatch.StartNew();
+            foreach (var item in items)
+            {
+                map.Remove(item);
+            }
+            Console.WriteLine("map remove " + sw.Elapsed);
+
+            sw = Stopwatch.StartNew();
+            foreach (var item in items)
+            {
+                tree.Remove(item);
+            }
+            Console.WriteLine("tree remove " + sw.Elapsed);
+            if (tree.Any()) throw new Exception("Remove did not work");
         }
 
-        static void AssertEqual(BTree<int, int> tree, HashSet<int> set)
+        static void AssertEqual(BTreeDictionary<int, int> tree, HashSet<int> set)
         {
             var s2 = new HashSet<int>(set);
             foreach (var t in tree)            
@@ -98,7 +113,7 @@ namespace btree
                 throw new Exception("remove failed " + s2.Count);
         }
 
-		static void TestAdd (BTree<int, int> tree, int[] items)
+		static void TestAdd (BTreeDictionary<int, int> tree, int[] items)
 		{
 			int i = 0;
 			foreach (var item in items) {
@@ -112,7 +127,7 @@ namespace btree
             tree.Verify();
 		}
 
-		static void Verify (BTree<int, int> tree)
+		static void Verify (BTreeDictionary<int, int> tree)
 		{
 			int? i = null;
 			foreach (var item in tree.Select (n => n.Key)) {

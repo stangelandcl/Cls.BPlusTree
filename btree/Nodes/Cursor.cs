@@ -7,14 +7,14 @@ namespace btree
 {
     class BTreeCursor<TKey,TValue> : ISortedDictionaryCursor<TKey,TValue>
     {
-        public BTreeCursor(BTree<TKey, TValue> tree, KeyPosition<TKey, TValue> position)
+        public BTreeCursor(BTreeDictionary<TKey, TValue> tree, KeyPosition<TKey, TValue> position)
         {
             this.tree = tree;
             this.position = position;
         }
 
         KeyPosition<TKey, TValue> position;
-        BTree<TKey, TValue> tree;
+        BTreeDictionary<TKey, TValue> tree;
 
         public bool MoveTo(TKey key)
         {

@@ -78,25 +78,21 @@ namespace btree
 		public List<TKey> Keys {get; private set;}
         public List<INode<TKey, TValue>> Nodes { get; private set; }
 
-		public INode<TKey,TValue> Left(INode<TKey,TValue> node){
-			var i = Nodes.IndexOf (node) - 1;
-			if(i >= 0) return Nodes[i];
-			return null;
+		public INode<TKey,TValue> Left(int index){
+            if (--index < 0) return null;
+            return Nodes[index];			
 		}
 
-		public INode<TKey,TValue> Right(INode<TKey,TValue> node){
-			var i = Nodes.IndexOf (node) + 1;
-			if(i < Nodes.Count) return Nodes[i];
-			return null;
+		public INode<TKey,TValue> Right(int index){
+            if (++index == Count) return null;
+            return Nodes[index];
 		}
 
-		public void Update(INode<TKey,TValue> node){
-			var i = Nodes.IndexOf (node);
-			Keys [i] = node.Keys [0];
+		public void Update(int index, INode<TKey,TValue> node){			
+			Keys [index] = node.Keys [0];
 		}
 
-		public void Remove(INode<TKey,TValue> node){
-			var index = Nodes.IndexOf (node);
+		public void Remove(int index){			
 			Keys.RemoveAt (index);
 			Nodes.RemoveAt (index);
 		}
@@ -122,11 +118,10 @@ namespace btree
 			return items;
 		}
 
-        public void Replace(INode<TKey, TValue> oldNode, INode<TKey, TValue> newNode)
-        {
-            var i = Nodes.IndexOf(oldNode);
-            Nodes[i] = newNode;
-            Keys[i] = newNode.Keys[0];
+        public void Replace(int index, INode<TKey, TValue> newNode)
+        {            
+            Nodes[index] = newNode;
+            Keys[index] = newNode.Keys[0];
         }        
 
 
