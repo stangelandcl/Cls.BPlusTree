@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace btree
+namespace BTree
 {
     public interface ISortedDictionary<TKey,TValue> : IDictionary<TKey, TValue>
     {

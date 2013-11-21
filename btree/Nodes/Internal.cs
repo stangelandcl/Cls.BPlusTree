@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Diagnostics;
 
-namespace btree
+namespace BTree
 {
     [DebuggerDisplay("Nodes={Nodes.Count} Keys={Keys.Count}")]
 	public class Internal<TKey,TValue> : INode<TKey, TValue>, IEnumerable<INode<TKey,TValue>>

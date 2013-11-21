@@ -1,5 +1,9 @@
-This a C# B+ Tree implementation. 
+This an in memory C# B+ Tree implementation. A BTree might be faster but I want to eventually make a disk based version.
+And B+ trees seem to be recommended for that situation.
 It is an alternative to binary search trees like treap, AA, red-black and AVL trees.
 
-It is incomplete and only supports adding at the moment.
+It is complete as far as an IDictionary<TKey, TValue> implementation.
+It does not have the Cursor implemented yet for moving to a key and then going forward or backward
+It uses about 1/3 the memory of a Dictionary which is good but takes 5 times as long to do add, remove or lookup data which is bad.
+But items are maintained in sorted order unlike a hash table.
 

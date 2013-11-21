@@ -1,6 +1,6 @@
 using System;
 
-namespace btree
+namespace BTree
 {
 	public static class Constants
 	{

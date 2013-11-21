@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace btree
+namespace BTree
 {
     public partial class BTreeDictionary<TKey, TValue>
     {

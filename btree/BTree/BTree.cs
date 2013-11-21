@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace btree
+namespace BTree
 {
 	public partial class BTreeDictionary<TKey, TValue> : IDictionary<TKey,TValue>
 	{

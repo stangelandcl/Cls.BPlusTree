@@ -1,46 +1,48 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
+using BTree;
 
-namespace btree
+namespace BTreeTest
 {
-	class MainClass
-	{
-		public static void Main (string[] args)
-		{
-			var tree = new BTreeDictionary<int,int> ();
-			var rand = new Random (1);
-			var items = Enumerable.Range (0, int.MaxValue).Select (n => rand.Next ()).Distinct ().Take(3*1000*1000).ToArray ();
+    class MainClass
+    {
+        public static void Main(string[] args)
+        {
+            var tree = new BTreeDictionary<int, int>();
+            var rand = new Random(1);
+            var items = Enumerable.Range(0, int.MaxValue).Select(n => rand.Next()).Distinct().Take(3 * 1000 * 1000).ToArray();
 
             PerformanceTest(items);
 
-			TestAdd (tree, items);
-			var set = new HashSet<int> (items);
+            TestAdd(tree, items);
+            var set = new HashSet<int>(items);
             int i = 0;
-            
-			foreach (var item in items) {
-				tree.Remove (item);
-				set.Remove (item);
-              
+
+            foreach (var item in items)
+            {
+                tree.Remove(item);
+                set.Remove(item);
+
                 //if (tree.Count() != set.Count())
                 //    throw new Exception("Count mismatch at i=" + i);
                 //if(++i % 10001 == 0)
                 //Verify (tree);
                 //AssertEqual(tree, set);
                 i++;
-                if (i % 10001 == 0 )
+                if (i % 10001 == 0)
                 {
                     Console.WriteLine(i);
                     AssertEqual(tree, set);
                     tree.Verify();
-                     
-                   // Verify(tree);
-                  
+
+                    // Verify(tree);
+
                 }
-			}
+            }
             tree.Verify();
-		}
+        }
 
         static void PerformanceTest(int[] items)
         {
@@ -49,7 +51,7 @@ namespace btree
 
             var gc = GC.GetTotalMemory(true);
             var sw = Stopwatch.StartNew();
-            foreach (var item in items)            
+            foreach (var item in items)
                 map[item] = item;
             var e = sw.Elapsed;
             var mem = GC.GetTotalMemory(true) - gc;
@@ -57,7 +59,7 @@ namespace btree
 
             gc = GC.GetTotalMemory(true);
             sw = Stopwatch.StartNew();
-            foreach (var item in items)            
+            foreach (var item in items)
                 tree[item] = item;
             e = sw.Elapsed;
             var mem2 = GC.GetTotalMemory(true) - gc;
@@ -68,7 +70,7 @@ namespace btree
             foreach (var item in items)
             {
                 var x = map[item];
-            }         
+            }
             Console.WriteLine("map read " + sw.Elapsed);
 
             sw = Stopwatch.StartNew();
@@ -106,36 +108,39 @@ namespace btree
         static void AssertEqual(BTreeDictionary<int, int> tree, HashSet<int> set)
         {
             var s2 = new HashSet<int>(set);
-            foreach (var t in tree)            
+            foreach (var t in tree)
                 if (!s2.Remove(t.Key))
                     throw new Exception("Missing " + t.Key);
             if (s2.Count != 0)
                 throw new Exception("remove failed " + s2.Count);
         }
 
-		static void TestAdd (BTreeDictionary<int, int> tree, int[] items)
-		{
-			int i = 0;
-			foreach (var item in items) {
-				tree.Add (item, item);
-				if (++i % 1000 == 0) {
-					Console.WriteLine (i);
-					//Verify (tree);
-				}
-			}
-			Verify (tree);
+        static void TestAdd(BTreeDictionary<int, int> tree, int[] items)
+        {
+            int i = 0;
+            foreach (var item in items)
+            {
+                tree.Add(item, item);
+                if (++i % 1000 == 0)
+                {
+                    Console.WriteLine(i);
+                    //Verify (tree);
+                }
+            }
+            Verify(tree);
             tree.Verify();
-		}
+        }
 
-		static void Verify (BTreeDictionary<int, int> tree)
-		{
-			int? i = null;
-			foreach (var item in tree.Select (n => n.Key)) {
-				if (i.HasValue)
-					if (item <= i.Value)
-						throw new Exception ("dup or out of order " + item + " and " + i.Value);
-				i = item;
-			}
-		}
-	}
+        static void Verify(BTreeDictionary<int, int> tree)
+        {
+            int? i = null;
+            foreach (var item in tree.Select(n => n.Key))
+            {
+                if (i.HasValue)
+                    if (item <= i.Value)
+                        throw new Exception("dup or out of order " + item + " and " + i.Value);
+                i = item;
+            }
+        }
+    }
 }

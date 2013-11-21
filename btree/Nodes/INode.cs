@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace btree
+namespace BTree
 {
 	public interface INode<TKey, TValue>
 	{
