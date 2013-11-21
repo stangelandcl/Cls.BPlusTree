@@ -32,7 +32,7 @@ namespace btree
         {
             var node = (Internal<TKey, TValue>)root;
             var next = node.GetNode(key, comparer);
-            var removed = Remove(node, next.Node, next.Index, key);
+            var removed = Remove(node, next, key);
             if (removed.Rebalanced)
             {
                 if (removed.NewParent != null)
@@ -40,73 +40,73 @@ namespace btree
             }
         }
 
-        RebalanceResult Remove(INode<TKey, TValue> parent, INode<TKey, TValue> child, int childIndex, TKey key)
+        RebalanceResult Remove(INode<TKey, TValue> parent, NodeIndex<TKey,TValue> child,  TKey key)
         {
-            var leaf = child as Leaf<TKey, TValue>;
+            var leaf = child.Node as Leaf<TKey, TValue>;
             if (leaf != null)
             {
                 if (!leaf.Remove(key, comparer))
                     return RebalanceResult.Empty;
-                ((Internal<TKey, TValue>)parent).Update(childIndex, child);
-                return Rebalance(parent, leaf, childIndex);
+                ((Internal<TKey, TValue>)parent).Update(child.Index, child.Node);
+                return Rebalance(parent, child);
             }
 
-            var grandChild = ((Internal<TKey, TValue>)child).GetNode(key, comparer);
-            var removed = Remove(child, grandChild.Node, grandChild.Index, key);
-            ((Internal<TKey, TValue>)parent).Update(childIndex, child);
+            var grandChild = ((Internal<TKey, TValue>)child.Node).GetNode(key, comparer);
+            var removed = Remove(child.Node, grandChild, key);
+            ((Internal<TKey, TValue>)parent).Update(child.Index, child.Node);
             if (removed.Rebalanced)
             {
                 if (removed.NewParent != null)
                 {
-                    ((Internal<TKey, TValue>)parent).Replace(childIndex, grandChild.Node);
-                    child = grandChild.Node;
+                    ((Internal<TKey, TValue>)parent).Replace(child.Index, grandChild.Node);
+                    child.Node = grandChild.Node;
                 }
-                return Rebalance(parent, child, childIndex);
+                return Rebalance(parent, child);
             }
             return RebalanceResult.Empty;
         }       
        
-        RebalanceResult Rebalance(INode<TKey, TValue> parentNode, INode<TKey, TValue> leaf, int leafIndex)
+        RebalanceResult Rebalance(INode<TKey, TValue> parentNode, NodeIndex<TKey,TValue> child)
         {
             var parent = (Internal<TKey, TValue>)parentNode;
 
-            if (leaf.Count >= Constants.MinNodeSize)
+            if (child.Node.Count >= Constants.MinNodeSize)
                 return RebalanceResult.Empty;
 
-            var left = parent.Left(leafIndex);
+            var left = parent.Left(child.Index);
             if (left != null && left.Count > Constants.MinNodeSize)
             {
-                leaf.AddFromRight(left, comparer);
-                parent.Update(leafIndex, leaf);
+                child.Node.AddFromRight(left, comparer);
+                parent.Update(child.Index, child.Node);
                 return RebalanceResult.Empty;
             }
 
-            var right = parent.Right(leafIndex);
+            var right = parent.Right(child.Index);
             if (right != null && right.Count > Constants.MinNodeSize)
             {
-                leaf.AddFromLeft(right, comparer);
-                parent.Update(leafIndex +1, right);
+                child.Node.AddFromLeft(right, comparer);
+                parent.Update(child.Index +1, right);
                 return RebalanceResult.Empty;
             }
 
             if (left != null)
             {
-                left.AddRange(leaf, comparer);
-                parent.Update(leafIndex-1, left);
-                parent.Remove(leafIndex);
+                left.AddRange(child.Node, comparer);
+                parent.Update(child.Index-1, left);
+                parent.Remove(child.Index);
                 return new RebalanceResult { Rebalanced = true };
             }
 
             if (right != null)
             {
-                right.AddRange(leaf, comparer);
-                parent.Update(leafIndex+1, right);
-                parent.Remove(leafIndex);
+                right.AddRange(child.Node, comparer);
+                parent.Update(child.Index+1, right);
+                parent.Remove(child.Index);
                 return new RebalanceResult { Rebalanced = true };
             }
             return new RebalanceResult
             {
-                NewParent = leaf,
+                NewParent = child.Node,
                 Rebalanced = true,
             };
         }
